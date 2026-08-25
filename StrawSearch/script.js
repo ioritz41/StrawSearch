@@ -1,9 +1,26 @@
 let tabs = [];
 let current = 0;
 
+async function checkServerConnection() {
+  const status = document.getElementById("serverStatus");
+
+  try {
+    const response = await fetch("/api/status");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    status.textContent = data.message;
+    status.classList.add("connected");
+  } catch {
+    status.textContent = "Server unavailable. Start server.js.";
+    status.classList.add("offline");
+  }
+}
+
 window.onload = () => {
   newTab();
   document.getElementById("search").focus();
+  checkServerConnection();
 };
 
 function newTab() {

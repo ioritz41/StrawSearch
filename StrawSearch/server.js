@@ -146,6 +146,11 @@ function serveStaticFile(req, res, filePath) {
 const server = http.createServer((req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
+  if (req.method === 'GET' && requestUrl.pathname === '/api/status') {
+    sendJson(req, res, 200, { connected: true, message: 'Hello from the StrawSearch server' });
+    return;
+  }
+
   if (req.method === 'GET' && requestUrl.pathname === '/api/search') {
     (async () => {
       const query = (requestUrl.searchParams.get('q') || '').trim();
