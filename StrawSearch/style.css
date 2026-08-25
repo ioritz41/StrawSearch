@@ -84,10 +84,18 @@ input {
 }
 
 #content iframe {
-	width:100%;
-	height:80vh;
+	display:block;
+	width:min(100%, 1100px);
+	height:clamp(280px, 62vh, 640px);
+	margin:0 auto;
 	border:none;
+	border-radius:0 0 10px 10px;
 	background:#ffe6f0;
+}
+
+#content {
+	width:min(100%, 1100px);
+	margin:0 auto;
 }
 
 .search-status {
@@ -168,8 +176,9 @@ input {
 	}
 
 	#content iframe {
-		height:calc(100vh - 125px);
-		min-height:420px;
+		width:calc(100% - 16px);
+		height:clamp(240px, 48vh, 430px);
+		border-radius:0 0 8px 8px;
 	}
 
 	.search-status,
