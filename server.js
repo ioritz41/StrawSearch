@@ -1,4 +1,5 @@
 const http = require('http');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
@@ -8,6 +9,8 @@ const publicDir = fs.existsSync(path.join(__dirname, 'index.html')) ? __dirname 
 const dataFile = fs.existsSync(path.join(__dirname, 'results.json'))
   ? path.join(__dirname, 'results.json')
   : path.join(__dirname, 'data', 'results.json');
+const sessionCookie = 'straw_session';
+const sessionLifetime = 30 * 60;
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -28,6 +31,25 @@ function loadResults() {
 
   const raw = fs.readFileSync(dataFile, 'utf8');
   return JSON.parse(raw);
+}
+
+function hasCookie(request, name) {
+  return (request.headers.cookie || '').split(';').some((cookie) => cookie.trim().startsWith(`${name}=`));
+}
+
+function prepareResponse(request, response) {
+  const headers = {
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN'
+  };
+
+  if (!hasCookie(request, sessionCookie)) {
+    const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    headers['Set-Cookie'] = `${sessionCookie}=${crypto.randomBytes(18).toString('hex')}; Max-Age=${sessionLifetime}; Path=/; HttpOnly; SameSite=Lax${secure}`;
+  }
+
+  return headers;
 }
 
 async function searchDuckDuckGo(query) {
@@ -100,15 +122,15 @@ async function searchDuckDuckGo(query) {
   }
 }
 
-function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+function sendJson(req, res, statusCode, payload) {
+  res.writeHead(statusCode, { ...prepareResponse(req, res), 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload));
 }
 
-function serveStaticFile(res, filePath) {
+function serveStaticFile(req, res, filePath) {
   fs.readFile(filePath, (err, content) => {
     if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.writeHead(404, { ...prepareResponse(req, res), 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('File not found');
       return;
     }
@@ -116,7 +138,7 @@ function serveStaticFile(res, filePath) {
     const extension = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[extension] || 'application/octet-stream';
 
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, { ...prepareResponse(req, res), 'Content-Type': contentType });
     res.end(content);
   });
 }
@@ -130,16 +152,16 @@ const server = http.createServer((req, res) => {
       const results = loadResults();
 
       if (!query) {
-        sendJson(res, 200, { query: '', results: results.slice(0, 6) });
+        sendJson(req, res, 200, { query: '', results: results.slice(0, 6) });
         return;
       }
 
       const apiResults = await searchDuckDuckGo(query);
-      sendJson(res, 200, { query, results: apiResults.length ? apiResults : [] });
+      sendJson(req, res, 200, { query, results: apiResults.length ? apiResults : [] });
     })().catch((error) => {
       const query = (requestUrl.searchParams.get('q') || '').trim();
       const results = loadResults();
-      sendJson(res, 200, {
+      sendJson(req, res, 200, {
         query,
         results: results.filter((item) => {
           const haystack = [item.title, item.description, item.url, ...(item.tags || [])]
@@ -156,18 +178,18 @@ const server = http.createServer((req, res) => {
   const filePath = path.join(publicDir, safePath);
 
   if (!filePath.startsWith(publicDir)) {
-    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.writeHead(403, { ...prepareResponse(req, res), 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Access denied');
     return;
   }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-    serveStaticFile(res, filePath);
+    serveStaticFile(req, res, filePath);
   } else {
-    serveStaticFile(res, path.join(publicDir, 'index.html'));
+    serveStaticFile(req, res, path.join(publicDir, 'index.html'));
   }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
