@@ -17,7 +17,8 @@ body {
 .brand {
 	width:min(100%, 1100px);
 	margin:0 auto;
-	padding:18px 20px 12px;
+	min-height:78px;
+	padding:24px 20px 18px;
 	text-align:center;
 	background:#fff5f9;
 	border-radius:12px 12px 0 0;
@@ -41,12 +42,14 @@ body {
 	margin:0 auto;
 	display:flex;
 	background:#ffd1e6;
-	padding:9px 10px;
+	min-height:58px;
+	padding:12px 10px;
 	gap:5px;
 }
 
 .tab {
-	padding:10px 14px;
+	min-height:38px;
+	padding:9px 14px;
 	background:#ffb6d5;
 	border-radius:8px;
 	cursor:pointer;
@@ -65,7 +68,8 @@ body {
 	display:flex;
 	align-items:center;
 	gap:10px;
-	padding:16px 18px;
+	min-height:76px;
+	padding:18px;
 	background:#ffe6f0;
 }
 
@@ -77,8 +81,8 @@ body {
 .nav button,
 .search-bar button {
 	border:none;
-	min-height:48px;
-	padding:11px 15px;
+	min-height:56px;
+	padding:13px 16px;
 	border-radius:8px;
 	background:#ffb6d5;
 	cursor:pointer;
@@ -88,8 +92,8 @@ body {
 input {
 	flex:1;
 	min-width:0;
-	min-height:48px;
-	padding:12px 14px;
+	min-height:56px;
+	padding:14px 16px;
 	border-radius:10px;
 	border:none;
 	background:#fff;
@@ -148,7 +152,8 @@ input {
 
 @media (max-width:600px) {
 	.brand {
-		padding:12px 12px 8px;
+		min-height:64px;
+		padding:18px 12px 12px;
 	}
 
 	.brand h1 {
@@ -156,11 +161,13 @@ input {
 	}
 
 	.tabs {
-		padding:7px 6px;
+		min-height:52px;
+		padding:10px 6px;
 		gap:4px;
 	}
 
 	.tab {
+		min-height:34px;
 		padding:8px 11px;
 		font-size:.85rem;
 	}
@@ -168,7 +175,8 @@ input {
 	.search-bar {
 		flex-wrap:wrap;
 		gap:8px;
-		padding:10px 12px;
+		min-height:112px;
+		padding:14px 12px;
 	}
 
 	.nav {
@@ -177,15 +185,17 @@ input {
 
 	.nav button,
 	.search-bar button {
-		padding:10px 12px;
+		min-height:50px;
+		padding:11px 12px;
 		font-size:1rem;
 	}
 
 	input {
 		flex:1 1 140px;
 		min-width:0;
+		min-height:50px;
 		font-size:1rem;
-		padding:10px 12px;
+		padding:11px 12px;
 	}
 
 	#content iframe {
