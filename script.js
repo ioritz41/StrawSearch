@@ -42,11 +42,35 @@ function render() {
   content.appendChild(iframe);
 }
 
+function getDirectUrl(value) {
+  const candidate = /^(www\.|[^\s/.]+\.[^\s]+$)/i.test(value) && !/^https?:\/\//i.test(value)
+    ? `https://${value}`
+    : value;
+
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 async function search() {
   const q = document.getElementById("search").value.trim();
   if (!q) return;
 
   const content = document.getElementById("content");
+  const directUrl = getDirectUrl(q);
+  if (directUrl) {
+    const openedWindow = window.open(directUrl, "_blank", "noopener,noreferrer");
+
+    if (!openedWindow) {
+      content.innerHTML = `<div class="search-status">Popup blocked. <a href="${directUrl}" target="_blank" rel="noopener noreferrer">Open URL</a></div>`;
+    }
+
+    return;
+  }
+
   content.innerHTML = '<div class="search-status">Searching StrawSearch...</div>';
 
   try {
