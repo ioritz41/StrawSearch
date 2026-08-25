@@ -17,13 +17,13 @@
 <div class="search-bar">
 
   <div class="nav">
-    <button onclick="back()">←</button>
-    <button onclick="reload()">↻</button>
-    <button onclick="forward()">→</button>
+    <button type="button" title="Go back" aria-label="Go back" onclick="back()">←</button>
+    <button type="button" title="Reload page" aria-label="Reload page" onclick="reload()">↻</button>
+    <button type="button" title="Go forward" aria-label="Go forward" onclick="forward()">→</button>
   </div>
 
   <input id="search" placeholder="StrawSearch..." onkeydown="enter(event)">
-  <button onclick="search()">🔎</button>
+  <button type="button" title="Search" aria-label="Search" onclick="search()">🔎</button>
 
 </div>
 
