@@ -5,7 +5,7 @@ body {
 	color:#6a2142;
 	overflow-x:hidden;
 	min-height:100vh;
-	padding:clamp(24px, 4vh, 42px) 16px;
+	padding:clamp(56px, 8vh, 92px) 16px 24px;
 }
 
 *,
