@@ -1,5 +1,58 @@
 let tabs = [];
 let current = 0;
+let loggedInUser = "";
+
+const accountForm = document.getElementById("accountForm");
+const accountMessage = document.getElementById("accountMessage");
+const logoutButton = document.getElementById("logoutButton");
+const historyList = document.getElementById("historyList");
+
+async function loadHistory() {
+  const response = await fetch("/api/history");
+  const data = await response.json();
+  loggedInUser = data.username || "";
+  accountMessage.textContent = loggedInUser
+    ? `Logged in as ${loggedInUser}. History expires after 30 minutes.`
+    : "No account: search history is not saved.";
+  logoutButton.hidden = !loggedInUser;
+  historyList.innerHTML = data.history.map((item) => `<li>${item.query}</li>`).join("");
+}
+
+accountForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const response = await fetch("/api/auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "login", username, password })
+  });
+
+  if (response.status === 401) {
+    const register = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "register", username, password })
+    });
+    if (!register.ok) {
+      const error = await register.json();
+      accountMessage.textContent = error.error;
+      return;
+    }
+  } else if (!response.ok) {
+    const error = await response.json();
+    accountMessage.textContent = error.error;
+    return;
+  }
+
+  accountForm.reset();
+  await loadHistory();
+});
+
+logoutButton.addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST" });
+  await loadHistory();
+});
 
 window.onload = () => {
   newTab();
@@ -78,6 +131,7 @@ async function search() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
+    await loadHistory();
     const results = data.results || [];
     content.innerHTML = "";
 

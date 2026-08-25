@@ -28,6 +28,17 @@
   <h1>Straw<span>Search</span></h1>
 </header>
 
+<section class="account-panel" aria-label="Account and search history">
+  <form id="accountForm">
+    <input id="username" required minlength="3" maxlength="20" placeholder="Username" autocomplete="username">
+    <input id="password" required minlength="8" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
+    <button type="submit">Register / log in</button>
+  </form>
+  <button id="logoutButton" type="button" hidden>Log out</button>
+  <p id="accountMessage" role="status">No account: search history is not saved.</p>
+  <ul id="historyList"></ul>
+</section>
+
 <div id="content"></div>
 
 <script src="script.js"></script>

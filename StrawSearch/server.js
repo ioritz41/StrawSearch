@@ -11,6 +11,9 @@ const dataFile = fs.existsSync(path.join(__dirname, 'results.json'))
   : path.join(__dirname, 'data', 'results.json');
 const sessionCookie = 'straw_session';
 const sessionLifetime = 30 * 60;
+const accounts = new Map();
+const sessions = new Map();
+const histories = new Map();
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -37,6 +40,67 @@ function hasCookie(request, name) {
   return (request.headers.cookie || '').split(';').some((cookie) => cookie.trim().startsWith(`${name}=`));
 }
 
+function cookieValue(request, name) {
+  const cookie = (request.headers.cookie || '').split(';').find((item) => item.trim().startsWith(`${name}=`));
+  return cookie ? cookie.trim().slice(name.length + 1) : '';
+}
+
+function createSession(request, response) {
+  const currentId = cookieValue(request, sessionCookie);
+  const current = sessions.get(currentId);
+  if (current && current.expiresAt > Date.now()) return current;
+
+  const id = crypto.randomBytes(18).toString('hex');
+  const session = { id, username: '', expiresAt: Date.now() + sessionLifetime * 1000 };
+  sessions.set(id, session);
+  response.sessionCookie = `${sessionCookie}=${id}; Max-Age=${sessionLifetime}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+  return session;
+}
+
+function readRequestBody(request) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 10000) reject(new Error('Request too large'));
+    });
+    request.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch {
+        reject(new Error('Invalid JSON'));
+      }
+    });
+    request.on('error', reject);
+  });
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  return new Promise((resolve, reject) => {
+    crypto.scrypt(password, salt, 64, (error, derivedKey) => {
+      if (error) reject(error);
+      else resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+async function passwordMatches(password, storedHash) {
+  const [salt, expected] = storedHash.split(':');
+  const actual = await hashPassword(password, salt);
+  return crypto.timingSafeEqual(Buffer.from(actual.split(':')[1], 'hex'), Buffer.from(expected, 'hex'));
+}
+
+function currentUser(request, response) {
+  return createSession(request, response).username;
+}
+
+function saveHistory(username, query) {
+  const now = Date.now();
+  const history = (histories.get(username) || []).filter((item) => item.expiresAt > now);
+  history.unshift({ query, expiresAt: now + sessionLifetime * 1000 });
+  histories.set(username, history.slice(0, 20));
+}
+
 function prepareResponse(request, response) {
   const headers = {
     'Cache-Control': 'no-store',
@@ -45,8 +109,8 @@ function prepareResponse(request, response) {
   };
 
   if (!hasCookie(request, sessionCookie)) {
-    const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-    headers['Set-Cookie'] = `${sessionCookie}=${crypto.randomBytes(18).toString('hex')}; Max-Age=${sessionLifetime}; Path=/; HttpOnly; SameSite=Lax${secure}`;
+    if (!response.sessionCookie) createSession(request, response);
+    headers['Set-Cookie'] = response.sessionCookie;
   }
 
   return headers;
@@ -145,6 +209,60 @@ function serveStaticFile(req, res, filePath) {
 
 const server = http.createServer((req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+  createSession(req, res);
+
+  if (req.method === 'POST' && requestUrl.pathname === '/api/auth') {
+    (async () => {
+      const body = await readRequestBody(req);
+      const username = String(body.username || '').trim().toLowerCase();
+      const password = String(body.password || '');
+      if (!/^[a-z0-9_]{3,20}$/.test(username) || password.length < 8) {
+        sendJson(req, res, 400, { error: 'Use a username with 3-20 letters, numbers or underscores and a password of at least 8 characters.' });
+        return;
+      }
+
+      const account = accounts.get(username);
+      if (body.action === 'register') {
+        if (account) {
+          sendJson(req, res, 409, { error: 'That username is already registered.' });
+          return;
+        }
+        accounts.set(username, { passwordHash: await hashPassword(password) });
+      } else if (body.action === 'login') {
+        if (!account || !(await passwordMatches(password, account.passwordHash))) {
+          sendJson(req, res, 401, { error: 'Invalid username or password.' });
+          return;
+        }
+      } else {
+        sendJson(req, res, 400, { error: 'Unsupported authentication action.' });
+        return;
+      }
+
+      const session = createSession(req, res);
+      session.username = username;
+      session.expiresAt = Date.now() + sessionLifetime * 1000;
+      sendJson(req, res, 200, { username, expiresIn: sessionLifetime });
+    })().catch(() => sendJson(req, res, 400, { error: 'Invalid authentication request.' }));
+    return;
+  }
+
+  if (req.method === 'POST' && requestUrl.pathname === '/api/logout') {
+    const session = createSession(req, res);
+    const username = session.username;
+    session.username = '';
+    histories.delete(username);
+    sendJson(req, res, 200, { loggedOut: true });
+    return;
+  }
+
+  if (req.method === 'GET' && requestUrl.pathname === '/api/history') {
+    const username = currentUser(req, res);
+    const history = username
+      ? (histories.get(username) || []).filter((item) => item.expiresAt > Date.now()).map((item) => ({ query: item.query, expiresAt: item.expiresAt }))
+      : [];
+    sendJson(req, res, 200, { username, history });
+    return;
+  }
 
   if (req.method === 'GET' && requestUrl.pathname === '/api/status') {
     sendJson(req, res, 200, { connected: true, message: 'Hello from the StrawSearch server' });
@@ -162,6 +280,8 @@ const server = http.createServer((req, res) => {
       }
 
       const apiResults = await searchDuckDuckGo(query);
+      const username = currentUser(req, res);
+      if (username) saveHistory(username, query);
       sendJson(req, res, 200, { query, results: apiResults.length ? apiResults : [] });
     })().catch((error) => {
       const query = (requestUrl.searchParams.get('q') || '').trim();
