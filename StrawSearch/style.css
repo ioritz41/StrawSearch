@@ -3,6 +3,13 @@ body {
 	font-family:Arial, Helvetica, sans-serif;
 	background:#ffe6f0;
 	color:#6a2142;
+	overflow-x:hidden;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing:border-box;
 }
 
 .brand {
@@ -116,4 +123,74 @@ input {
 	margin-bottom:0;
 	color:#6a2142;
 	line-height:1.45;
+}
+
+@media (max-width:600px) {
+	.brand {
+		padding:7px 12px 4px;
+	}
+
+	.brand h1 {
+		font-size:1.35rem;
+	}
+
+	.tabs {
+		padding:4px;
+		gap:4px;
+	}
+
+	.tab {
+		padding:5px 9px;
+		font-size:.85rem;
+	}
+
+	.search-bar {
+		flex-wrap:wrap;
+		gap:6px;
+		padding:7px;
+	}
+
+	.nav {
+		flex:0 0 auto;
+	}
+
+	.nav button,
+	.search-bar button {
+		padding:7px 9px;
+		font-size:.9rem;
+	}
+
+	input {
+		flex:1 1 120px;
+		min-width:0;
+		font-size:.9rem;
+		padding:7px 9px;
+	}
+
+	#content iframe {
+		height:calc(100vh - 125px);
+		min-height:420px;
+	}
+
+	.search-status,
+	.result-card {
+		width:calc(100% - 24px);
+	}
+
+	.search-status {
+		margin:16px auto 10px;
+		font-size:1rem;
+	}
+
+	.result-card {
+		padding:12px;
+	}
+
+	.result-card a {
+		font-size:.95rem;
+	}
+
+	.result-card p {
+		font-size:.88rem;
+	}
 }

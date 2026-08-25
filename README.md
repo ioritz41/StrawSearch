@@ -1,2 +1,0 @@
-# StrawSearch
-A private browser
