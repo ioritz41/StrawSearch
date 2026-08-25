@@ -74,21 +74,6 @@ body {
 	cursor:pointer;
 }
 
-.server-status {
-	padding:6px 10px;
-	text-align:center;
-	color:#936477;
-	font-size:.8rem;
-}
-
-.server-status.connected {
-	color:#4eaf68;
-}
-
-.server-status.offline {
-	color:#d93d6a;
-}
-
 input {
 	flex:1;
 	min-width:180px;
