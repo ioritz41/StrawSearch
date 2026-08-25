@@ -30,7 +30,7 @@ body {
 .brand h1 {
 	margin:0;
 	color:#ff6ea8;
-	font-size:clamp(1.35rem, 3vw, 2rem);
+	font-size:clamp(1.65rem, 3.5vw, 2.45rem);
 	font-weight:800;
 	letter-spacing:0;
 	text-shadow:0 3px 8px rgba(255, 91, 138, 0.16);
@@ -51,11 +51,12 @@ body {
 }
 
 .tab {
-	min-height:38px;
-	padding:9px 14px;
+	min-height:44px;
+	padding:11px 16px;
 	background:#ffb6d5;
 	border-radius:8px;
 	cursor:pointer;
+	font-size:1.05rem;
 }
 
 .tab.active {
@@ -84,23 +85,23 @@ body {
 .nav button,
 .search-bar button {
 	border:none;
-	min-height:60px;
-	padding:13px 16px;
+	min-height:66px;
+	padding:15px 18px;
 	border-radius:8px;
 	background:#ffb6d5;
 	cursor:pointer;
-	font-size:1.05rem;
+	font-size:1.2rem;
 }
 
 input {
 	flex:1;
 	min-width:0;
-	min-height:60px;
-	padding:16px;
+	min-height:66px;
+	padding:17px;
 	border-radius:10px;
 	border:none;
 	background:#fff;
-	font-size:1.05rem;
+	font-size:1.2rem;
 }
 
 #content iframe {
@@ -122,6 +123,7 @@ input {
 	margin:24px auto 14px;
 	width:min(90vw, 760px);
 	color:#6a2142;
+	font-size:1.15rem;
 }
 
 .result-card {
@@ -135,7 +137,7 @@ input {
 
 .result-card a {
 	color:#d93d6a;
-	font-size:1.05rem;
+	font-size:1.2rem;
 	font-weight:700;
 	text-decoration:none;
 }
@@ -151,6 +153,7 @@ input {
 	margin-bottom:0;
 	color:#6a2142;
 	line-height:1.45;
+	font-size:1.05rem;
 }
 
 @media (max-width:600px) {
@@ -160,7 +163,7 @@ input {
 	}
 
 	.brand h1 {
-		font-size:1.35rem;
+		font-size:1.65rem;
 	}
 
 	.tabs {
@@ -170,9 +173,9 @@ input {
 	}
 
 	.tab {
-		min-height:34px;
-		padding:8px 11px;
-		font-size:.85rem;
+		min-height:40px;
+		padding:10px 13px;
+		font-size:1rem;
 	}
 
 	.search-bar {
@@ -188,17 +191,17 @@ input {
 
 	.nav button,
 	.search-bar button {
-		min-height:56px;
-		padding:11px 12px;
-		font-size:1rem;
+		min-height:62px;
+		padding:13px 14px;
+		font-size:1.1rem;
 	}
 
 	input {
 		flex:1 1 140px;
 		min-width:0;
-		min-height:56px;
-		font-size:1rem;
-		padding:11px 12px;
+		min-height:62px;
+		font-size:1.1rem;
+		padding:13px 14px;
 	}
 
 	#content iframe {
@@ -214,7 +217,7 @@ input {
 
 	.search-status {
 		margin:16px auto 10px;
-		font-size:1rem;
+		font-size:1.1rem;
 	}
 
 	.result-card {
@@ -222,10 +225,10 @@ input {
 	}
 
 	.result-card a {
-		font-size:.95rem;
+		font-size:1.05rem;
 	}
 
 	.result-card p {
-		font-size:.88rem;
+		font-size:.98rem;
 	}
 }
