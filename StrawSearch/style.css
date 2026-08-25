@@ -21,7 +21,7 @@ body {
 	padding:18px 20px 12px;
 	text-align:center;
 	background:#fff5f9;
-	border-radius:12px 12px 0 0;
+	border-radius:0 0 12px 12px;
 }
 
 .brand h1 {
