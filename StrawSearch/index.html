@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,30 +14,19 @@
 <div class="search-bar">
 
   <div class="nav">
-    <button type="button" title="Go back" aria-label="Go back" onclick="back()">←</button>
-    <button type="button" title="Reload page" aria-label="Reload page" onclick="reload()">↻</button>
-    <button type="button" title="Go forward" aria-label="Go forward" onclick="forward()">→</button>
+    <button type="button" title="Go back" onclick="navigation.back()">←</button>
+    <button type="button" title="Reload page" onclick="navigation.reload()">↻</button>
+    <button type="button" title="Go forward" onclick="navigation.forward()">→</button>
   </div>
 
   <input id="search" placeholder="StrawSearch..." onkeydown="enter(event)">
-  <button type="button" title="Search" aria-label="Search" onclick="search()">🔎</button>
+  <button type="button" title="Search" onclick="search()">🔎</button>
 
 </div>
 
-<header class="brand" aria-label="StrawSearch">
+<header class="brand">
   <h1>Straw<span>Search</span></h1>
 </header>
-
-<section class="account-panel" aria-label="Account and search history">
-  <form id="accountForm">
-    <input id="username" required minlength="3" maxlength="20" placeholder="Username" autocomplete="username">
-    <input id="password" required minlength="8" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
-    <button type="submit">Register / log in</button>
-  </form>
-  <button id="logoutButton" type="button" hidden>Log out</button>
-  <p id="accountMessage" role="status">No account: search history is not saved.</p>
-  <ul id="historyList"></ul>
-</section>
 
 <div id="content"></div>
 
